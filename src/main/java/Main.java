@@ -36,7 +36,7 @@ public class Main {
     private static final int HEADER_RIGHT_FONT_SIZE = 16;
     private static final int FOOTER_RIGHT_FONT_SIZE = 16;
 
-    private static final String PDF_FONT = StandardFonts.TIMES_ROMAN;
+    private static final String PDF_FONT = "./src/main/resources/font/arial_font.ttf";
 
     private static final String SOURCE_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\"+FILENAME+".pdf";
     private static final String OUTPUT_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\output";
@@ -132,7 +132,8 @@ public class Main {
     }
 
     protected static void addWatermark(PdfDocument pdfDoc, String text) throws Exception {
-        PdfFont font = PdfFontFactory.createFont(FontProgramFactory.createFont(PDF_FONT));
+        PdfFont font = PdfFontFactory.createFont(PDF_FONT);
+
         Paragraph paragraph = new Paragraph(text)
                 .setFont(font)
                 .setFontSize(WATERMARK_FONT_SIZE);
