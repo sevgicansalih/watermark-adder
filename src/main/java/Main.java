@@ -21,24 +21,26 @@ import java.io.*;
 import java.util.*;
 
 public class Main {
-
-    private static final String FILENAME = "cilt1";
+    // dr mu hemşire mi ona göre kod çalıştır.
+    private static final String FILENAME = "temel";
+    private static final String DATA_GUEST_LIST="kasım_liste.csv";
     private static final String DATE_OF_MEETING = "25 Ekim 2022";
     private static final String GROUP_NAME = "Test Grubu";
     private static final String HEADER_LEFT = DATE_OF_MEETING;
     private static final String HEADER_RIGHT = GROUP_NAME;
     private static final String FOOTER_RIGHT_PREFIX = "Sayfa ";
+    private static final String ISIM_ONEK ="Dr. ";
 
     private static final int WATERMARK_FONT_SIZE = 36;
     private static final int HEADER_LEFT_FONT_SIZE = 16;
     private static final int HEADER_RIGHT_FONT_SIZE = 16;
     private static final int FOOTER_RIGHT_FONT_SIZE = 16;
 
-    private static final String PDF_FONT = StandardFonts.HELVETICA;
+    private static final String PDF_FONT = StandardFonts.TIMES_ROMAN;
 
-    private static final String SOURCE_PATH = "/Users/sevgican/IdeaProjects/PdfManipulatorMaven/"+FILENAME+".pdf";
-    private static final String OUTPUT_PATH = "/Users/sevgican/IdeaProjects/PdfManipulatorMaven/output";
-    private static final String GUEST_LIST_PATH = "/Users/sevgican/IdeaProjects/PdfManipulatorMaven/guest_list.csv";
+    private static final String SOURCE_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\"+FILENAME+".pdf";
+    private static final String OUTPUT_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\output";
+    private static final String GUEST_LIST_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\"+DATA_GUEST_LIST;
     private static final String NAME_COLUMN_NAME = "Guest name";
     private static final String TC_COLUMN_NAME = "TC Kimlik Numaranız";
 
@@ -60,7 +62,7 @@ public class Main {
 
                 // Open original pdf document
                 PdfDocument pdfDocument = getPdfDocument(getDestinationPath(guestName));
-                processDocument(pdfDocument, guestName, guestTc);
+                processDocument(pdfDocument, ISIM_ONEK+guestName, guestTc);
                 pdfDocument.close();
             }
         } catch (Exception e) {
@@ -110,12 +112,12 @@ public class Main {
             Rectangle pageSize = pdfDoc.getPage(i).getPageSize();
             // show header left
             float positionX = 120;
-            float positionY = pageSize.getTop() - 60;
+            float positionY = pageSize.getTop() - 40;
             doc.showTextAligned(headerLeft, positionX, positionY, i, TextAlignment.CENTER, VerticalAlignment.MIDDLE, 0);
 
             //show header right
             positionX = pageSize.getWidth() - 100;
-            positionY = pageSize.getTop() - 60;
+            positionY = pageSize.getTop() - 40;
             doc.showTextAligned(headerRight, positionX, positionY, i, TextAlignment.CENTER, VerticalAlignment.MIDDLE, 0);
 
             //show footer
@@ -124,7 +126,7 @@ public class Main {
                     .setFontSize(FOOTER_RIGHT_FONT_SIZE);
 
             positionX = pageSize.getWidth() - 100;
-            positionY = pageSize.getBottom() + 60;
+            positionY = pageSize.getBottom() + 40;
             doc.showTextAligned(footer, positionX, positionY, i, TextAlignment.CENTER, VerticalAlignment.MIDDLE, 0);
         }
     }
