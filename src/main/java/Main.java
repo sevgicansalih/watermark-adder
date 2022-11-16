@@ -52,14 +52,14 @@ public class Main {
 
     private static final String PDF_FONT = "./src/main/resources/font/arial_font.ttf";
 
-//    private static final String SOURCE_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\" + FILENAME + ".pdf";
-//    private static final String OUTPUT_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\output";
-//    private static final String GUEST_LIST_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\" + DATA_GUEST_LIST;
+    private static final String SOURCE_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\" + FILENAME + ".pdf";
+    private static final String OUTPUT_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\output";
+    private static final String GUEST_LIST_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\" + DATA_GUEST_LIST;
 
     // Salihin Test alani
-    private static final String SOURCE_PATH = "/Users/sevgican/IdeaProjects/watermark-adder/" + FILENAME + ".pdf";
-    private static final String OUTPUT_PATH = "/Users/sevgican/IdeaProjects/watermark-adder/output";
-    private static final String GUEST_LIST_PATH = "/Users/sevgican/IdeaProjects/watermark-adder/" + DATA_GUEST_LIST;
+//    private static final String SOURCE_PATH = "/Users/sevgican/IdeaProjects/watermark-adder/" + FILENAME + ".pdf";
+//    private static final String OUTPUT_PATH = "/Users/sevgican/IdeaProjects/watermark-adder/output";
+//    private static final String GUEST_LIST_PATH = "/Users/sevgican/IdeaProjects/watermark-adder/" + DATA_GUEST_LIST;
 
 
     public static void main(String[] args) {
