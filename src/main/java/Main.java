@@ -62,7 +62,7 @@ public class Main {
 
                 // Open original pdf document
                 PdfDocument pdfDocument = getPdfDocument(getDestinationPath(guestName));
-                processDocument(pdfDocument, ISIM_ONEK+guestName, guestTc);
+                processDocument(pdfDocument, ISIM_ONEK+getCamelCaseFormat(guestName), guestTc);
                 pdfDocument.close();
             }
         } catch (Exception e) {
@@ -163,7 +163,7 @@ public class Main {
     }
 
     private static String getDestinationPath(String guestName) throws Exception {
-        String camelCase = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, guestName.replace(" ", "_"));
+        String camelCase = getCamelCaseFormat(guestName);
         File file = new File(OUTPUT_PATH);
         if (!file.exists()) {
             boolean isCreated = file.mkdir();
@@ -172,5 +172,9 @@ public class Main {
             }
         }
         return OUTPUT_PATH + "/" +FILENAME+"_"+ camelCase +".pdf";
+    }
+
+    private static String getCamelCaseFormat(String name) {
+        return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, name.replace(" ", "_"));
     }
 }
