@@ -1,6 +1,4 @@
 import com.google.common.base.CaseFormat;
-import com.itextpdf.io.font.FontProgramFactory;
-import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.Rectangle;
@@ -17,20 +15,36 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.Arrays;
+import java.util.List;
 
 public class Main {
     // dr mu hemşire mi ona göre kod çalıştır.
+    private static final String ISIM_ONEK = "Dr. ";
+
+    // pdf dosya ismi ve csv dosya ismi
     private static final String FILENAME = "temel";
-    private static final String DATA_GUEST_LIST="kasım_liste.csv";
+    private static final String DATA_GUEST_LIST = "kasım_liste.csv";
+
+    // csv dosyasindaki sutun isimleri
+    private static final String NAME_COLUMN_NAME = "Guest name";
+    private static final String TC_COLUMN_NAME = "TC Kimlik Numaranız";
+
+    // PDF Editleme Sifresi
+    private static final String OWNER_PASSWORD = "123";
+
+    // watermark textleri
     private static final String DATE_OF_MEETING = "25 Ekim 2022";
     private static final String GROUP_NAME = "Test Grubu";
     private static final String HEADER_LEFT = DATE_OF_MEETING;
     private static final String HEADER_RIGHT = GROUP_NAME;
     private static final String FOOTER_RIGHT_PREFIX = "Sayfa ";
-    private static final String ISIM_ONEK ="Dr. ";
 
+    // watermark Font size
     private static final int WATERMARK_FONT_SIZE = 36;
     private static final int HEADER_LEFT_FONT_SIZE = 16;
     private static final int HEADER_RIGHT_FONT_SIZE = 16;
@@ -38,12 +52,14 @@ public class Main {
 
     private static final String PDF_FONT = "./src/main/resources/font/arial_font.ttf";
 
-    private static final String SOURCE_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\"+FILENAME+".pdf";
-    private static final String OUTPUT_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\output";
-    private static final String GUEST_LIST_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\"+DATA_GUEST_LIST;
-    private static final String NAME_COLUMN_NAME = "Guest name";
-    private static final String TC_COLUMN_NAME = "TC Kimlik Numaranız";
+//    private static final String SOURCE_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\" + FILENAME + ".pdf";
+//    private static final String OUTPUT_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\output";
+//    private static final String GUEST_LIST_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF\\sevgicanakademi\\şirket işleri\\kayıt masası\\kasım kayıt\\hekim_127_salih\\" + DATA_GUEST_LIST;
 
+    // Salihin Test alani
+    private static final String SOURCE_PATH = "/Users/sevgican/IdeaProjects/watermark-adder/" + FILENAME + ".pdf";
+    private static final String OUTPUT_PATH = "/Users/sevgican/IdeaProjects/watermark-adder/output";
+    private static final String GUEST_LIST_PATH = "/Users/sevgican/IdeaProjects/watermark-adder/" + DATA_GUEST_LIST;
 
 
     public static void main(String[] args) {
@@ -61,8 +77,8 @@ public class Main {
                 String guestTc = row.get(tcColumnIdx);
 
                 // Open original pdf document
-                PdfDocument pdfDocument = getPdfDocument(getDestinationPath(guestName));
-                processDocument(pdfDocument, ISIM_ONEK+getCamelCaseFormat(guestName), guestTc);
+                PdfDocument pdfDocument = getPdfDocument(getDestinationPath(guestName), guestTc);
+                processDocument(pdfDocument, ISIM_ONEK + getCamelCaseFormat(guestName), guestTc);
                 pdfDocument.close();
             }
         } catch (Exception e) {
@@ -91,8 +107,18 @@ public class Main {
         return cr.readAll();
     }
 
-    private static PdfDocument getPdfDocument(String destinationPath) throws Exception {
-        return new PdfDocument(new PdfReader(SOURCE_PATH), new PdfWriter(destinationPath));
+    private static PdfDocument getPdfDocument(String destinationPath, String guestTc) throws Exception {
+        log("File: " + new File(destinationPath).getName() + " Psswd: " + guestTc);
+        return new PdfDocument(new PdfReader(SOURCE_PATH),
+                new PdfWriter(destinationPath,
+                        new WriterProperties()
+                                .setStandardEncryption(
+                                        guestTc.getBytes(),
+                                        OWNER_PASSWORD.getBytes(),
+                                        0,
+                                        EncryptionConstants.ENCRYPTION_AES_256)
+                )
+        );
     }
 
     private static void addHeaderAndFooter(PdfDocument pdfDoc) throws Exception {
@@ -171,7 +197,7 @@ public class Main {
                 throw new Exception("Directory cannot be created!");
             }
         }
-        return OUTPUT_PATH + "/" +FILENAME+"_"+ camelCase +".pdf";
+        return OUTPUT_PATH + "/" + FILENAME + "_" + camelCase + ".pdf";
     }
 
     private static String getCamelCaseFormat(String name) {
