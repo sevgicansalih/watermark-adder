@@ -15,6 +15,8 @@ import com.opencsv.CSVParserBuilder;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVReaderBuilder;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
@@ -63,6 +65,37 @@ public class Main {
 
 
     public static void main(String[] args) {
+        //doPdfModificationWork();
+//        createGUI();
+        new MySwingApp();
+    }
+
+    private static void createGUI() {
+        JFrame frame = new JFrame("My First GUI");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(300,500);
+
+        // 8 JPanels
+
+        /*
+         * First panel 2 radio buttons, 1 JTextField, 1 JFileChooser
+         */
+        JPanel firstPanel = GUI.getFirstPanel();
+        /*
+         * Second panel 1 JLabel, 2 JFormattedTextField
+         */
+
+        /*
+         * Third panel 1 JLabel, 2 RadioButtons
+         */
+
+
+        // second section
+        frame.add(firstPanel); // Adds Button to content pane of frame
+        frame.setVisible(true);
+    }
+
+    private static void doPdfModificationWork() {
         try {
             // reads CSV
             List<String[]> table = readCSV();
