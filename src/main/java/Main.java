@@ -42,7 +42,8 @@ public class Main {
     private static final String PDF_FONT = "./src/main/resources/font/arial_font.ttf";
 
 
-    private static final String TEMPLATE_INSTRUCTIONS_PATH = "watermark_dosyalar/degiskenler.csv";
+    private static final String TEMPLATE_INSTRUCTIONS_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF" +
+            "\\sevgicanakademi\\şirket işleri\\kayıt masası\\temmuz\\degiskenler.csv";
     private static final String COLUMN_COURSE_OWNER = "Kimin_Dersi";
     private static final String COLUMN_ONEK = "Onek";
     private static final String COLUMN_COURSE_NAME = "Ders_Adi";
@@ -52,10 +53,10 @@ public class Main {
     private static final String COLUMN_GUESTLIST_SOURCE_PATH = "Katilimci_Lokasyon";
     private static final String COLUMN_OUTPUT_DIRECTORY_NAME = "Output_Lokasyon";
     private static final String COLUMN_SHOULD_PROCESS = "Hangisini_Uret";
-    private static final String NO_PREFIX = "No: ";
+    private static final String NO_PREFIX = "No:";
     private static final String PATH_SEPERATOR_LINUX = "/";
     private static final String PATH_SEPERATOR_WINDOWS = "\\";
-    private static final String PATH_SEPERATOR_CURRENT = PATH_SEPERATOR_LINUX;
+    private static final String PATH_SEPERATOR_CURRENT = PATH_SEPERATOR_WINDOWS;
     private static final boolean IS_PASSWORD_ENCRYPTION_ENABLED = false;
 
 
@@ -164,7 +165,7 @@ public class Main {
     }
 
     private static List<String[]> readTemplateInstructionsCSV() throws Exception {
-        return readCSV(TEMPLATE_INSTRUCTIONS_PATH, ';', "UTF-8");
+        return readCSV(TEMPLATE_INSTRUCTIONS_PATH, ';', "iso-8859-9");
     }
 
     private static List<String[]> readCSV(String csvPath, Character separator, String fileCharset) throws Exception {
