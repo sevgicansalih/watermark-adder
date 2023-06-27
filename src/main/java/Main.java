@@ -117,9 +117,9 @@ public class Main {
                     String guestName = row.get(nameColumnIdx);
                     String guestTc = row.get(tcColumnIdx);
 
-                    String guestNameForDoc = getCamelCaseFormat(guestName);
+                    String guestNameForDoc = "";
                     if (onek.length() > 0) {
-                        guestNameForDoc = onek + " " + guestNameForDoc;
+                        guestNameForDoc = onek + " " + toTitleCase(guestName);
                     }
                     // Open original pdf document
                     PdfDocument pdfDocument = getPdfDocument(pdfPath, getDestinationPath(outputPath, pdfPath, guestName), guestTc);
@@ -296,5 +296,16 @@ public class Main {
 
     private static String getCamelCaseFormat(String name) {
         return CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.UPPER_CAMEL, name.replace(" ", "_"));
+    }
+
+    private static String toTitleCase(String givenString) {
+        String[] arr = givenString.split(" ");
+        StringBuilder sb = new StringBuilder();
+
+        for (String s : arr) {
+            sb.append(Character.toUpperCase(s.charAt(0)))
+                    .append(s.substring(1)).append(" ");
+        }
+        return sb.toString().trim();
     }
 }
