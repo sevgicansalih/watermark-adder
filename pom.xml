@@ -24,11 +24,6 @@
     </repositories>
 
     <dependencies>
-        <dependency>
-            <groupId>com.groupdocs</groupId>
-            <artifactId>groupdocs-watermark</artifactId>
-            <version>20.5</version>
-        </dependency>
 
         <!-- always needed -->
         <dependency>

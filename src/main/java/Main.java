@@ -1,4 +1,5 @@
 import com.google.common.base.CaseFormat;
+import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.font.PdfFont;
 import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.Rectangle;
@@ -27,6 +28,7 @@ public class Main {
     // csv dosyasindaki sutun isimleri
     private static final String NAME_COLUMN_NAME = "Guest name";
     private static final String TC_COLUMN_NAME = "TC Kimlik Numaranız";
+    private static final String CERTIFICATE_NO_COLUMN_NAME = "Sertifika No";
 
     // PDF Editleme Sifresi
     private static final String OWNER_PASSWORD = "123";
@@ -39,11 +41,18 @@ public class Main {
     private static final int HEADER_FONT_SIZE = 16;
     private static final int FOOTER_RIGHT_FONT_SIZE = 16;
 
+    // certificate text properties
+    private static final int CERTIFICATE_TITLE_FONT_SIZE = 56;
+    private static final DeviceRgb CERTIFICATE_TITLE_COLOR = new DeviceRgb(3, 33, 87);
+    private static final float CERTIFICATE_CHAR_SPACING = 1.1f;
+
     private static final String PDF_FONT = "./src/main/resources/font/arial_font.ttf";
+    private static final String CERTIFICATE_NAME_FONT = "./src/main/resources/font/GalacticAdventure.otf";
+    private static final String CERTIFICATE_FONT = "./src/main/resources/font/Montserrat-Regular.ttf";
 
-
-    private static final String TEMPLATE_INSTRUCTIONS_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF" +
+        private static final String TEMPLATE_INSTRUCTIONS_PATH = "C:\\Users\\Cihan\\OneDrive\\Belgeler\\AKTİF" +
             "\\sevgicanakademi\\şirket işleri\\kayıt masası\\temmuz\\degiskenler.csv";
+//    private static final String TEMPLATE_INSTRUCTIONS_PATH = "/Users/sevgican/IdeaProjects/watermark-adder/watermark_dosyalar/degiskenler_mac.csv";
     private static final String COLUMN_COURSE_OWNER = "Kimin_Dersi";
     private static final String COLUMN_ONEK = "Onek";
     private static final String COLUMN_COURSE_NAME = "Ders_Adi";
@@ -67,9 +76,9 @@ public class Main {
     private static void doMain() {
         try {
             String pathToFolder = new File(TEMPLATE_INSTRUCTIONS_PATH).getParentFile().getAbsolutePath();
-            System.out.println("Reading instructions... path: "+ pathToFolder);
+            System.out.println("Reading instructions... folder path: " + pathToFolder);
             List<String[]> instructionsTable = readTemplateInstructionsCSV();
-            System.out.println("Instructions read is completed. Size: "+ instructionsTable.size());
+            System.out.println("Instructions read is completed. Size: " + instructionsTable.size());
             List<String> instructionsTableHeaders = Arrays.asList(instructionsTable.get(0));
             int courseOwnerIndex = instructionsTableHeaders.indexOf(COLUMN_COURSE_OWNER);
             int onekIndex = instructionsTableHeaders.indexOf(COLUMN_ONEK);
@@ -90,10 +99,9 @@ public class Main {
                 String date = instructionRow.get(dateIndex);
                 String no = instructionRow.get(noIndex);
                 if (shouldSkipInstructionRow(shouldProcess)) {
-                    System.out.println("Skipping course: \""+courseName+"\" from: "+courseOwner);
+                    System.out.println("Skipping course: \"" + courseName + "\" from: " + courseOwner);
                     continue;
                 }
-
 
                 no = NO_PREFIX + no;
                 String pdfPath = instructionRow.get(pdfPathIndex);
@@ -107,26 +115,34 @@ public class Main {
                 // reads CSV
                 List<String[]> guestlistTable = readGuestListCSV(guestlistPath);
                 System.out.println("GuestTable is read. Size: " + guestlistTable.size());
-                // Find Table Headers
-                List<String> tableHeaders = Arrays.asList(guestlistTable.get(0));
-                int nameColumnIdx = tableHeaders.indexOf(NAME_COLUMN_NAME);
-                int tcColumnIdx = tableHeaders.indexOf(TC_COLUMN_NAME);
-                // For loop traverses each Row one by one
-                for (int rowIdx = 1; rowIdx < guestlistTable.size(); rowIdx++) {
-                    List<String> row = Arrays.asList(guestlistTable.get(rowIdx));
-                    String guestName = row.get(nameColumnIdx);
-                    String guestTc = row.get(tcColumnIdx);
 
-                    String guestNameForDoc = "";
-                    if (onek.length() > 0) {
-                        guestNameForDoc = onek + " " + toTitleCase(guestName);
-                    }
-                    // Open original pdf document
-                    PdfDocument pdfDocument = getPdfDocument(pdfPath, getDestinationPath(outputPath, pdfPath, guestName), guestTc);
-                    processDocument(pdfDocument, guestNameForDoc, guestTc, courseOwner, courseName, no, date);
-                    pdfDocument.close();
+                if (courseName.toLowerCase().contains("sertifika")) {
+                    System.out.println("Processing for instruction row idx: " + instructionRowIdx + " started as Certificate");
+                    processCertificates(
+                            instructionRowIdx,
+                            guestlistTable,
+                            onek,
+                            pdfPath,
+                            outputPath,
+                            courseOwner,
+                            courseName,
+                            no,
+                            date
+                    );
+                } else {
+                    System.out.println("Processing for instruction row idx: " + instructionRowIdx + " started as Course Notes");
+                    processCourseNotes(
+                            instructionRowIdx,
+                            guestlistTable,
+                            onek,
+                            pdfPath,
+                            outputPath,
+                            courseOwner,
+                            courseName,
+                            no,
+                            date
+                    );
                 }
-                System.out.println("Pdf processing for instruction row idx: "+ instructionRowIdx +" is completed.");
             }
 
         } catch (Exception e) {
@@ -134,11 +150,80 @@ public class Main {
         }
     }
 
+    private static void processCertificates(
+            int instructionRowIdx,
+            List<String[]> guestlistTable,
+            String onek,
+            String pdfPath,
+            String outputPath,
+            String courseOwner,
+            String courseName,
+            String no,
+            String date) throws Exception {
+        // Find Table Headers
+        List<String> tableHeaders = Arrays.asList(guestlistTable.get(0));
+        int nameColumnIdx = tableHeaders.indexOf(NAME_COLUMN_NAME);
+        int tcColumnIdx = tableHeaders.indexOf(TC_COLUMN_NAME);
+        int certificateNoColumnIdx = tableHeaders.indexOf(CERTIFICATE_NO_COLUMN_NAME);
+        // For loop traverses each Row one by one
+        for (int rowIdx = 1; rowIdx < guestlistTable.size(); rowIdx++) {
+            List<String> row = Arrays.asList(guestlistTable.get(rowIdx));
+            String guestName = row.get(nameColumnIdx);
+            String guestTc = row.get(tcColumnIdx);
+            String guestCertificateNo = row.get(certificateNoColumnIdx);
+
+            String guestNameForDoc = "";
+            if (onek.length() > 0) {
+                guestNameForDoc = onek + " " + toTitleCase(guestName);
+            } else {
+                guestNameForDoc = guestName;
+            }
+            // Open original pdf document
+            PdfDocument pdfDocument = getPdfDocument(pdfPath, getDestinationPath(outputPath, pdfPath, guestName), guestTc);
+            processCertificateDocument(pdfDocument, guestNameForDoc, guestTc, guestCertificateNo, date);
+            pdfDocument.close();
+        }
+        System.out.println("Pdf processing for instruction row idx: " + instructionRowIdx + " is completed.");
+    }
+
+    private static void processCourseNotes(
+            int instructionRowIdx,
+            List<String[]> guestlistTable,
+            String onek,
+            String pdfPath,
+            String outputPath,
+            String courseOwner,
+            String courseName,
+            String no,
+            String date) throws Exception {
+        // Find Table Headers
+        List<String> tableHeaders = Arrays.asList(guestlistTable.get(0));
+        int nameColumnIdx = tableHeaders.indexOf(NAME_COLUMN_NAME);
+        int tcColumnIdx = tableHeaders.indexOf(TC_COLUMN_NAME);
+        // For loop traverses each Row one by one
+        for (int rowIdx = 1; rowIdx < guestlistTable.size(); rowIdx++) {
+            List<String> row = Arrays.asList(guestlistTable.get(rowIdx));
+            String guestName = row.get(nameColumnIdx);
+            String guestTc = row.get(tcColumnIdx);
+
+            String guestNameForDoc = "";
+            if (onek.length() > 0) {
+                guestNameForDoc = onek + " " + toTitleCase(guestName);
+            }
+            // Open original pdf document
+            PdfDocument pdfDocument = getPdfDocument(pdfPath, getDestinationPath(outputPath, pdfPath, guestName), guestTc);
+            processDocument(pdfDocument, guestNameForDoc, guestTc, courseOwner, courseName, no, date);
+            pdfDocument.close();
+        }
+        System.out.println("Pdf processing for instruction row idx: " + instructionRowIdx + " is completed.");
+    }
+
     private static boolean shouldSkipInstructionRow(String shouldProcess) {
         try {
             int bool = Integer.parseInt(shouldProcess);
             return bool != 1;
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
         return true;
     }
 
@@ -153,12 +238,22 @@ public class Main {
         addWatermark(pdfDocument, guestName);
     }
 
+    private static void processCertificateDocument(
+            PdfDocument pdfDocument,
+            String guestName,
+            String guestTc,
+            String certificateNo,
+            String date
+    ) throws Exception {
+        fillCertificate(pdfDocument, guestName, guestTc, certificateNo, date);
+    }
+
     private static List<String[]> readGuestListCSV(String path) throws Exception {
         String nonNullPath;
         if (path != null) {
             nonNullPath = path;
         } else {
-            System.out.println("Guest list path is null!");
+            log("Guest list path is null!");
             throw new Exception("Guest list path is null!");
         }
         return readCSV(nonNullPath, '\t', "UTF-16");
@@ -188,7 +283,7 @@ public class Main {
 
         WriterProperties wp = new WriterProperties();
         if (IS_PASSWORD_ENCRYPTION_ENABLED) {
-            wp =  new WriterProperties()
+            wp = new WriterProperties()
                     .setStandardEncryption(
                             guestTc.getBytes(),
                             OWNER_PASSWORD.getBytes(),
@@ -207,7 +302,7 @@ public class Main {
                                            String date) throws Exception {
         Document doc = new Document(pdfDoc);
 
-        String allHeader = date+" "+courseName+" "+no;
+        String allHeader = date + " " + courseName + " " + no;
         int sizeDecrement = (allHeader.length() - 60) / 10;
         if (sizeDecrement < 0) {
             sizeDecrement = 0;
@@ -216,7 +311,6 @@ public class Main {
         Paragraph headerAll = new Paragraph(allHeader)
                 .setFont(PdfFontFactory.createFont(PDF_FONT))
                 .setFontSize(HEADER_FONT_SIZE - sizeDecrement);
-
 
 
         Paragraph footer;
@@ -269,6 +363,53 @@ public class Main {
         }
     }
 
+    private static void fillCertificate(PdfDocument pdfDoc,
+                                        String guestName,
+                                        String guestTc,
+                                        String certificateNo,
+                                        String dateString) throws Exception{
+        Document doc = new Document(pdfDoc);
+
+        PdfFont font = PdfFontFactory.createFont(CERTIFICATE_FONT);
+        PdfFont fontForName = PdfFontFactory.createFont(CERTIFICATE_NAME_FONT);
+
+        Paragraph name = new Paragraph(guestName)
+                .setFont(fontForName)
+                .setFontColor(CERTIFICATE_TITLE_COLOR)
+                .setFontSize(CERTIFICATE_TITLE_FONT_SIZE);
+
+        Paragraph tc = new Paragraph(guestTc)
+                .setCharacterSpacing(CERTIFICATE_CHAR_SPACING)
+                .setFont(font)
+                .setFontSize(HEADER_FONT_SIZE);
+
+        Paragraph no = new Paragraph(certificateNo)
+                .setCharacterSpacing(CERTIFICATE_CHAR_SPACING)
+                .setFont(font)
+                .setFontSize(HEADER_FONT_SIZE);
+
+        Paragraph date = new Paragraph(dateString)
+                .setCharacterSpacing(CERTIFICATE_CHAR_SPACING)
+                .setFont(font)
+                .setFontSize(HEADER_FONT_SIZE);
+
+        for (int i = 1; i <= pdfDoc.getNumberOfPages(); i++) {
+            Rectangle pageSize = pdfDoc.getPage(i).getPageSize();
+            float positionX;
+            float positionY;
+
+            // show header all
+            positionX = pageSize.getWidth() / 2 - 16;
+            positionY = pageSize.getBottom() + 82;
+            doc.showTextAligned(date, positionX, positionY, i, TextAlignment.LEFT, VerticalAlignment.MIDDLE, 0);
+            doc.showTextAligned(no, positionX, positionY - 22, i, TextAlignment.LEFT, VerticalAlignment.MIDDLE, 0);
+            doc.showTextAligned(tc, positionX, positionY - 45, i, TextAlignment.LEFT, VerticalAlignment.MIDDLE, 0);
+
+            doc.showTextAligned(name, positionX, pageSize.getHeight() * 0.64f , i, TextAlignment.CENTER, VerticalAlignment.MIDDLE, 0);
+
+        }
+    }
+
     private static void log(String message) {
         System.out.println(message);
     }
@@ -290,7 +431,7 @@ public class Main {
         String filenameWithExtension = pdfFile.getName();
         String filename = filenameWithExtension.substring(0, filenameWithExtension.indexOf("."));
         String output = outputPath + PATH_SEPERATOR_CURRENT + filename + "_" + camelCase + ".pdf";
-        System.out.println("outputPath: "+ output);
+        System.out.println("outputPath: " + output);
         return output;
     }
 
